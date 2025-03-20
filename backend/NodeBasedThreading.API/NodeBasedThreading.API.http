@@ -1,0 +1,6 @@
+@NodeBasedThreading.API_HostAddress = http://localhost:5190
+
+GET {{NodeBasedThreading.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
