@@ -1,13 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
+import '@xyflow/react/dist/style.css';
 
 export const Route = createFileRoute('/')({
   component: Index,
 })
 
+import { Flow } from '../components/Flow';
+
 function Index() {
   return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
+    <div className="w-full h-full">
+      <Flow />
     </div>
-  )
+  );
 }
