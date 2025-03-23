@@ -1,144 +1,148 @@
+import { useFlowStore } from "@/hooks/useFlowStore";
+import { useDnD } from "@/lib/DnDContext";
+import { getNodeTypesMap, nodeTypes } from "@/lib/nodeTypes";
 import {
-    Background,
-    Controls,
-    Edge,
-    OnConnect,
-    OnEdgesChange,
-    OnNodesChange,
-    ReactFlow,
-    addEdge,
-    applyEdgeChanges,
-    applyNodeChanges,
-    type Node,
+  Background,
+  Controls,
+  Edge,
+  OnConnect,
+  OnEdgesChange,
+  OnNodesChange,
+  ReactFlow,
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+  useReactFlow,
+  type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useMemo, useState } from "react";
-import AssignmentNode from "./nodes/AssignmentNode";
-import ConditionNode from "./nodes/ConditionNode";
-import ConstantAssignmentNode from "./nodes/ConstantAssignmentNode";
-import StartEndNode from "./nodes/StartEndNode";
-import TextUpdaterNode from "./nodes/TextUpdaterNode";
-import InputNode from "./nodes/InputNode";
-import OutputNode from "./nodes/OutputNode";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 const defaulEdgeOptions = {
-    animated: true,
-    type: "step",
+  animated: true,
+  type: "step",
 };
 
-const initialNodes: Node[] = [
-    {
-        id: "1",
-        position: { x: 250, y: 50 },
-        data: {},
-        type: "startEnd",
-    },
-    {
-        id: "3",
-        position: { x: 100, y: 250 },
-        data: { variable: "counter", constant: "0" },
-        type: "constantAssignment",
-    },
-    {
-        id: "4",
-        position: { x: 400, y: 150 },
-        data: {},
-        type: "condition",
-    },
-    {
-        id: "6",
-        position: { x: 600, y: 250 },
-        data: {},
-        type: "assignment",
-    },
-    {
-        id: "7",
-        position: { x: 600, y: 350 },
-        data: { type: "end" },
-        type: "startEnd",
-    },
-    {
-        id: "9",
-        position: { x: 900, y: 350 },
-        data: { lable: "custom" },
-        type: "read",
-    },
-    {
-        id: "10",
-        position: { x: 900, y: 500 },
-        data: { lable: "custom" },
-        type: "write",
-    },
-];
+const initialNodes: Node[] = [];
 
-const initialEdges: Edge[] = [
-    // { id: "e1-2", source: "1", target: "2", animated: true, type: "step" },
-    // { id: "e2-3", source: "2", target: "3", animated: true, type: "step" },
-    // { id: "e3-4", source: "3", target: "4", animated: true, type: "step" },
-    // {
-    //     id: "e4-5",
-    //     source: "4",
-    //     target: "5",
-    //     sourceHandle: "true",
-    //     animated: true,
-    //     type: "step",
-    // },
-    // {
-    //     id: "e4-6",
-    //     source: "4",
-    //     target: "6",
-    //     sourceHandle: "false",
-    //     animated: true,
-    //     type: "step",
-    // },
-    // { id: "e5-7", source: "5", target: "7", animated: true, type: "step" },
-    // { id: "e6-7", source: "6", target: "7", animated: true, type: "step" },
-];
+const initialEdges: Edge[] = [];
+
+interface FlowWrapperProps {
+  children: ReactNode;
+  className?: string;
+}
+
+function FlowWrapper({ children, className }: FlowWrapperProps) {
+  return (
+    <div className={`h-full min-h-[500px] w-full ${className || ""}`}>
+      {children}
+    </div>
+  );
+}
+
+let id = 20;
+const getId = () => `dndnode_${id++}`;
 
 export function Flow() {
-    const nodeTypes = useMemo(
-        () => ({
-            textUpdater: TextUpdaterNode,
-            assignment: AssignmentNode,
-            constantAssignment: ConstantAssignmentNode,
-            condition: ConditionNode,
-            startEnd: StartEndNode,
-            read: InputNode,
-            write: OutputNode,
-        }),
-        [],
-    );
+  // Use the centralized node types map
+  const nodeTypesMap = useMemo(() => getNodeTypesMap(), []);
 
-    const [nodes, setNodes] = useState(initialNodes);
-    const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState<Node[]>(initialNodes);
+  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const { screenToFlowPosition } = useReactFlow();
+  const [type] = useDnD();
+  
+  // Sync with global store
+  const storeSetNodes = useFlowStore((state) => state.setNodes);
+  const storeSetEdges = useFlowStore((state) => state.setEdges);
+  
+  // Update store when local state changes
+  useEffect(() => {
+    storeSetNodes(nodes);
+  }, [nodes, storeSetNodes]);
+  
+  useEffect(() => {
+    storeSetEdges(edges);
+  }, [edges, storeSetEdges]);
 
-    const onNodesChange: OnNodesChange = useCallback(
-        (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-        [setNodes],
-    );
-    const onEdgesChange: OnEdgesChange = useCallback(
-        (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-        [setEdges],
-    );
-    const onConnect: OnConnect = useCallback(
-        (connection) => setEdges((eds) => addEdge(connection, eds)),
-        [setEdges],
-    );
+  const onNodesChange: OnNodesChange = useCallback(
+    (changes) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+    },
+    [setNodes],
+  );
 
-    return (
-        <ReactFlow
-            nodeTypes={nodeTypes}
-            nodes={nodes}
-            onNodesChange={onNodesChange}
-            edges={edges}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            panOnScroll
-            selectionOnDrag
-            defaultEdgeOptions={defaulEdgeOptions}
-        >
-            <Background />
-            <Controls />
-        </ReactFlow>
-    );
+  const onEdgesChange: OnEdgesChange = useCallback(
+    (changes) => {
+      setEdges((eds) => applyEdgeChanges(changes, eds));
+    },
+    [setEdges],
+  );
+
+  const onConnect: OnConnect = useCallback(
+    (connection) => {
+      setEdges((eds) => addEdge(connection, eds));
+    },
+    [setEdges],
+  );
+
+  const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+
+      // check if the dropped element is valid
+      if (!type || !nodeTypes[type]) {
+        console.warn(
+          "Node type is not set in DnD context or not found in configuration",
+        );
+        return;
+      }
+
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      // Get default data from the node type configuration
+      const nodeConfig = nodeTypes[type];
+
+      const newNode: Node = {
+        id: getId(),
+        type,
+        position,
+        data: { ...nodeConfig.initialData },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [screenToFlowPosition, type],
+  );
+
+  return (
+    <FlowWrapper>
+      <ReactFlow
+        nodeTypes={nodeTypesMap}
+        nodes={nodes}
+        onNodesChange={onNodesChange}
+        edges={edges}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        panOnScroll
+        selectionOnDrag
+        defaultEdgeOptions={defaulEdgeOptions}
+        className="h-full w-full"
+        fitView
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </FlowWrapper>
+  );
 }
