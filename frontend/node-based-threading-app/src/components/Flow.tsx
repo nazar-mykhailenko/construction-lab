@@ -36,44 +36,41 @@ function FlowWrapper({ children, className }: FlowWrapperProps) {
   );
 }
 
-let id = 20;
-const getId = () => `dndnode_${id++}`;
+const getId = () => `node_${crypto.randomUUID()}`;
 
 export function Flow() {
   // Use the centralized node types map
   const nodeTypesMap = useMemo(() => getNodeTypesMap(), []);
 
   // Get stored nodes and edges from Zustand
-  const { nodes: storedNodes, edges: storedEdges, setNodes: storeSetNodes, setEdges: storeSetEdges } = useFlowStore();
-  
+  const {
+    nodes: storedNodes,
+    edges: storedEdges,
+    setNodes: storeSetNodes,
+    setEdges: storeSetEdges,
+  } = useFlowStore();
+
   // Initialize local state from the store
   const [nodes, setNodes] = useState<Node[]>(storedNodes);
   const [edges, setEdges] = useState<Edge[]>(storedEdges);
-  
+
   const { screenToFlowPosition } = useReactFlow();
   const [type] = useDnD();
-  
+
   // Sync with global store when local state changes
   useEffect(() => {
-    storeSetNodes(nodes);
-  }, [nodes, storeSetNodes]);
-  
-  useEffect(() => {
-    storeSetEdges(edges);
-  }, [edges, storeSetEdges]);
-
-  // Sync local state if store changes from elsewhere
-  useEffect(() => {
+    // Only update the store if the local state is different
     if (JSON.stringify(nodes) !== JSON.stringify(storedNodes)) {
-      setNodes(storedNodes);
+      storeSetNodes(nodes);
     }
-  }, [storedNodes]);
+  }, [nodes, storeSetNodes, storedNodes]);
 
   useEffect(() => {
+    // Only update the store if the local state is different
     if (JSON.stringify(edges) !== JSON.stringify(storedEdges)) {
-      setEdges(storedEdges);
+      storeSetEdges(edges);
     }
-  }, [storedEdges]);
+  }, [edges, storeSetEdges, storedEdges]);
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
