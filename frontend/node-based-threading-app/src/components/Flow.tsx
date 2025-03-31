@@ -23,10 +23,6 @@ const defaulEdgeOptions = {
   type: "step",
 };
 
-const initialNodes: Node[] = [];
-
-const initialEdges: Edge[] = [];
-
 interface FlowWrapperProps {
   children: ReactNode;
   className?: string;
@@ -47,16 +43,17 @@ export function Flow() {
   // Use the centralized node types map
   const nodeTypesMap = useMemo(() => getNodeTypesMap(), []);
 
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  // Get stored nodes and edges from Zustand
+  const { nodes: storedNodes, edges: storedEdges, setNodes: storeSetNodes, setEdges: storeSetEdges } = useFlowStore();
+  
+  // Initialize local state from the store
+  const [nodes, setNodes] = useState<Node[]>(storedNodes);
+  const [edges, setEdges] = useState<Edge[]>(storedEdges);
+  
   const { screenToFlowPosition } = useReactFlow();
   const [type] = useDnD();
   
-  // Sync with global store
-  const storeSetNodes = useFlowStore((state) => state.setNodes);
-  const storeSetEdges = useFlowStore((state) => state.setEdges);
-  
-  // Update store when local state changes
+  // Sync with global store when local state changes
   useEffect(() => {
     storeSetNodes(nodes);
   }, [nodes, storeSetNodes]);
@@ -64,6 +61,19 @@ export function Flow() {
   useEffect(() => {
     storeSetEdges(edges);
   }, [edges, storeSetEdges]);
+
+  // Sync local state if store changes from elsewhere
+  useEffect(() => {
+    if (JSON.stringify(nodes) !== JSON.stringify(storedNodes)) {
+      setNodes(storedNodes);
+    }
+  }, [storedNodes]);
+
+  useEffect(() => {
+    if (JSON.stringify(edges) !== JSON.stringify(storedEdges)) {
+      setEdges(storedEdges);
+    }
+  }, [storedEdges]);
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
