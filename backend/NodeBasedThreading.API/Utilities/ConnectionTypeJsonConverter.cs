@@ -7,7 +7,7 @@ class ConnectionTypeJsonConverter : JsonConverter<ConnectionType>
     public override ConnectionType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var value = reader.GetString();
-        return Enum.TryParse<ConnectionType>(value, out var connectionType) ? connectionType : ConnectionType.Normal;
+        return Enum.TryParse<ConnectionType>(value, true, out var connectionType) ? connectionType : ConnectionType.Normal;
     }
 
     public override void Write(Utf8JsonWriter writer, ConnectionType value, JsonSerializerOptions options)

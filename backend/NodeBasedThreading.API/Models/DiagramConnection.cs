@@ -12,7 +12,7 @@ namespace NodeBasedThreading.API.Models
         [JsonPropertyName("target")]
         public string TargetId { get; set; }
 
-        [JsonPropertyName("type")]
+        [JsonPropertyName("sourceHandle")]
         [JsonConverter(typeof(ConnectionTypeJsonConverter))]
         public ConnectionType Type { get; set; } = ConnectionType.Normal;
     }
