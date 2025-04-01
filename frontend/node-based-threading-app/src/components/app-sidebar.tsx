@@ -34,23 +34,23 @@ const handleConvertToCode = () => {
 
 const items = [
   {
-    title: "Створити",
+    title: "Create",
     icon: FilePlus,
     onClick: handleCreate,
   },
   {
-    title: "Імпортувати",
+    title: "Import",
     icon: FileDown,
     onClick: handleImport,
   },
   // We'll handle the Save button separately
   {
-    title: "Тестувати",
+    title: "Test",
     icon: Play,
     onClick: handleTest,
   },
   {
-    title: "Перевести в код",
+    title: "Convert to Code",
     icon: FileText,
     onClick: handleConvertToCode,
   },
@@ -71,7 +71,7 @@ export function AppSidebar() {
       downloadFlowAsJson(nodes, edges);
     } catch (error) {
       console.error("Error saving flow:", error);
-      alert("Помилка при збереженні діаграми. Спробуйте знову.");
+      alert("Error saving diagram. Please try again.");
     }
   };
 

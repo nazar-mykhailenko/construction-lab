@@ -8,6 +8,13 @@ import {
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import { useCallback, useState } from "react";
+import {
+  NodeHeader,
+  NodeHeaderTitle,
+  NodeHeaderActions,
+  NodeHeaderMenuAction,
+} from "../node-header";
+import { DropdownMenuItem } from "../ui/dropdown-menu";
 
 // Define the custom node type
 type StartEndNode = Node<{ type?: "start" | "end" }, "startEnd">;
@@ -15,8 +22,17 @@ type StartEndNode = Node<{ type?: "start" | "end" }, "startEnd">;
 function StartEndNode({ data, id }: NodeProps<StartEndNode>) {
   // Set default type to "start" if not provided
   const [type, setType] = useState(data.type || "start");
-  const { getEdges, setEdges } = useReactFlow();
+  const { getEdges, setEdges, deleteElements } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
+
+  const handleDelete = useCallback(() => {
+    deleteElements({ nodes: [{ id }] });
+  }, [deleteElements, id]);
+
+  const onReset = useCallback(() => {
+    setType("start");
+    data.type = "start";
+  }, [data]);
 
   // Initialize data.type if it's not set
   if (!data.type) {
@@ -65,9 +81,15 @@ function StartEndNode({ data, id }: NodeProps<StartEndNode>) {
         />
       )}
 
-      <div className="mb-2 text-sm font-medium">
-        {type === "start" ? "Start" : "End"}
-      </div>
+      <NodeHeader>
+        <NodeHeaderTitle>{type === "start" ? "Start" : "End"}</NodeHeaderTitle>
+        <NodeHeaderActions>
+          <NodeHeaderMenuAction label="Open node menu">
+            <DropdownMenuItem onSelect={onReset}>Reset</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
+          </NodeHeaderMenuAction>
+        </NodeHeaderActions>
+      </NodeHeader>
 
       <div className="flex justify-center">
         <select

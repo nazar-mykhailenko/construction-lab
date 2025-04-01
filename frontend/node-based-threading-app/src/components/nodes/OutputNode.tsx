@@ -1,20 +1,13 @@
 import { useCallback } from "react";
 import { BaseNode } from "../base-node";
-import {
-  NodeHeader,
-  NodeHeaderActions,
-  NodeHeaderMenuAction,
-  NodeHeaderTitle,
-} from "../node-header";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
 import { NodeProps, useReactFlow, Node, Handle, Position } from "@xyflow/react";
 
 // Define the custom node type
 type OutputNode = Node<{ variable: string }, "write">;
 
-function OutputNode({ id, data }: NodeProps<OutputNode>) {
-  const { updateNodeData, setNodes } = useReactFlow();
+function OutputNode({ id, data, selected }: NodeProps<OutputNode>) {
+  const { updateNodeData } = useReactFlow();
 
   const handleLabelChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,22 +22,9 @@ function OutputNode({ id, data }: NodeProps<OutputNode>) {
     updateNodeData(id, { variable: "" });
   }, [id, updateNodeData]);
 
-  const handleDelete = useCallback(() => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== id));
-  }, [id, setNodes]);
-
   return (
-    <BaseNode>
+    <BaseNode id={id} title="Output" onReset={handleReset} selected={selected}>
       <Handle type="target" position={Position.Top} />
-      <NodeHeader>
-        <NodeHeaderTitle>Output</NodeHeaderTitle>
-        <NodeHeaderActions>
-          <NodeHeaderMenuAction label="Open node menu">
-            <DropdownMenuItem onSelect={handleReset}>Reset</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
-          </NodeHeaderMenuAction>
-        </NodeHeaderActions>
-      </NodeHeader>
 
       <Input
         value={data.variable}

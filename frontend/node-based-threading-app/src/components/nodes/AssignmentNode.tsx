@@ -1,13 +1,8 @@
-import { Handle, Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
+import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { useCallback } from "react";
-import {
-  NodeHeader,
-  NodeHeaderTitle,
-  NodeHeaderActions,
-  NodeHeaderMenuAction,
-} from "../node-header";
 import { Input } from "../ui/input";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { BaseHandle } from "../base-handle";
+import { BaseNode } from "../base-node";
 
 // Define the custom node type
 type AssignmentNode = Node<
@@ -15,8 +10,8 @@ type AssignmentNode = Node<
   "assignment"
 >;
 
-function AssignmentNode({ id, data }: NodeProps<AssignmentNode>) {
-  const { updateNodeData, setNodes } = useReactFlow();
+function AssignmentNode({ id, data, selected }: NodeProps<AssignmentNode>) {
+  const { updateNodeData } = useReactFlow();
   const onLeftVariableChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       console.log(e.target.value);
@@ -38,27 +33,14 @@ function AssignmentNode({ id, data }: NodeProps<AssignmentNode>) {
     updateNodeData(id, { leftVariable: "", rightVariable: "" });
   }, [id, updateNodeData]);
 
-  const handleDelete = useCallback(() => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== id));
-  }, [id, setNodes]);
-
   return (
-    <div className={"rounded-md border border-gray-200 bg-white p-3 shadow-md"}>
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="h-3 w-3 bg-blue-500"
-      />
-
-      <NodeHeader>
-        <NodeHeaderTitle>Assignment</NodeHeaderTitle>
-        <NodeHeaderActions>
-          <NodeHeaderMenuAction label="Open node menu">
-            <DropdownMenuItem onSelect={handleReset}>Reset</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
-          </NodeHeaderMenuAction>
-        </NodeHeaderActions>
-      </NodeHeader>
+    <BaseNode
+      id={id}
+      title="Assignment"
+      onReset={handleReset}
+      selected={selected}
+    >
+      <BaseHandle type="target" position={Position.Top} />
 
       <div className="flex items-center gap-2">
         <div className="flex w-full flex-col">
@@ -81,14 +63,8 @@ function AssignmentNode({ id, data }: NodeProps<AssignmentNode>) {
           />
         </div>
       </div>
-
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="a"
-        className="h-3 w-3 bg-blue-500"
-      />
-    </div>
+      <BaseHandle type="source" position={Position.Bottom} />
+    </BaseNode>
   );
 }
 

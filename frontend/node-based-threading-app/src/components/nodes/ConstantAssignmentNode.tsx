@@ -1,13 +1,8 @@
-import { Handle, Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
+import { Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { useCallback } from "react";
-import {
-  NodeHeader,
-  NodeHeaderTitle,
-  NodeHeaderActions,
-  NodeHeaderMenuAction,
-} from "../node-header";
 import { Input } from "../ui/input";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { BaseNode } from "../base-node";
+import { BaseHandle } from "../base-handle";
 
 // Define the custom node type
 type ConstantAssignmentNode = Node<
@@ -18,8 +13,9 @@ type ConstantAssignmentNode = Node<
 function ConstantAssignmentNode({
   id,
   data,
+  selected,
 }: NodeProps<ConstantAssignmentNode>) {
-  const { updateNodeData, setNodes } = useReactFlow();
+  const { updateNodeData } = useReactFlow();
 
   const onVariableChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,27 +38,14 @@ function ConstantAssignmentNode({
     updateNodeData(id, { variable: "", constant: "" });
   }, [id, updateNodeData]);
 
-  const handleDelete = useCallback(() => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== id));
-  }, [id, setNodes]);
-
   return (
-    <div className={"rounded-md border border-gray-200 bg-white p-3 shadow-md"}>
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="h-3 w-3 bg-blue-500"
-      />
-
-      <NodeHeader>
-        <NodeHeaderTitle>Constant Assignment</NodeHeaderTitle>
-        <NodeHeaderActions>
-          <NodeHeaderMenuAction label="Open node menu">
-            <DropdownMenuItem onSelect={handleReset}>Reset</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
-          </NodeHeaderMenuAction>
-        </NodeHeaderActions>
-      </NodeHeader>
+    <BaseNode
+      id={id}
+      title="Constant Assignment"
+      onReset={handleReset}
+      selected={selected}
+    >
+      <BaseHandle type="target" position={Position.Top} />
 
       <div className="flex items-center gap-2">
         <div className="flex w-full flex-col">
@@ -84,13 +67,8 @@ function ConstantAssignmentNode({
         </div>
       </div>
 
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="a"
-        className="h-3 w-3 bg-blue-500"
-      />
-    </div>
+      <BaseHandle type="source" position={Position.Bottom} />
+    </BaseNode>
   );
 }
 

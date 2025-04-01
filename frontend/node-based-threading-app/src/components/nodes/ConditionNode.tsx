@@ -1,13 +1,6 @@
 import { Handle, Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { useCallback } from "react";
-import {
-  NodeHeader,
-  NodeHeaderTitle,
-  NodeHeaderActions,
-  NodeHeaderMenuAction,
-} from "../node-header";
 import { Input } from "../ui/input";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
 import { Label } from "../ui/label";
 import {
   Select,
@@ -16,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { BaseNode } from "../base-node";
 
 // Define the custom node type
 type ConditionNode = Node<
@@ -27,8 +21,8 @@ type ConditionNode = Node<
   "condition"
 >;
 
-function ConditionNode({ id, data }: NodeProps<ConditionNode>) {
-  const { updateNodeData, setNodes } = useReactFlow();
+function ConditionNode({ id, data, selected }: NodeProps<ConditionNode>) {
+  const { updateNodeData } = useReactFlow();
 
   const onVariableChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,27 +55,18 @@ function ConditionNode({ id, data }: NodeProps<ConditionNode>) {
     updateNodeData(id, { variable: "", constant: "", operator: "==" });
   }, [id, updateNodeData]);
 
-  const handleDelete = useCallback(() => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== id));
-  }, [id, setNodes]);
-
   return (
-    <div className={"rounded-md border border-gray-200 bg-white p-3 shadow-md"}>
+    <BaseNode
+      id={id}
+      title="Condition"
+      onReset={handleReset}
+      selected={selected}
+    >
       <Handle
         type="target"
         position={Position.Top}
         className="h-3 w-3 bg-blue-500"
       />
-
-      <NodeHeader>
-        <NodeHeaderTitle>Condition</NodeHeaderTitle>
-        <NodeHeaderActions>
-          <NodeHeaderMenuAction label="Open node menu">
-            <DropdownMenuItem onSelect={handleReset}>Reset</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
-          </NodeHeaderMenuAction>
-        </NodeHeaderActions>
-      </NodeHeader>
 
       <div className="flex items-center gap-2">
         <div className="flex w-full flex-col">
@@ -102,9 +87,6 @@ function ConditionNode({ id, data }: NodeProps<ConditionNode>) {
                 target: { value },
               } as React.ChangeEvent<HTMLSelectElement>);
             }}
-            className={
-              "nodrag border-input h-9 rounded-md border bg-transparent px-2 py-1 text-sm"
-            }
           >
             <SelectTrigger className="w-[90px]">
               <SelectValue placeholder="Select a operator" />
@@ -142,7 +124,7 @@ function ConditionNode({ id, data }: NodeProps<ConditionNode>) {
           style={{ backgroundColor: "red" }}
         />
       </div>
-    </div>
+    </BaseNode>
   );
 }
 
