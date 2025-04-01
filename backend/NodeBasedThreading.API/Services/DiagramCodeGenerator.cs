@@ -350,40 +350,15 @@ namespace NodeBasedThreading.API.Services
                     {
                         // Generate the condition
                         ExpressionSyntax condition;
-                        if (op == "==")
-                        {
-                            condition = BinaryExpression(
-                                SyntaxKind.EqualsExpression,
-                                IdentifierName(condVar),
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal(condConstValue)
-                                )
-                            );
-                        }
-                        else if (op == "<")
-                        {
-                            condition = BinaryExpression(
-                                SyntaxKind.LessThanExpression,
-                                IdentifierName(condVar),
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal(condConstValue)
-                                )
-                            );
-                        }
-                        else
-                        {
-                            // Default to equality if unknown operator
-                            condition = BinaryExpression(
-                                SyntaxKind.EqualsExpression,
-                                IdentifierName(condVar),
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal(condConstValue)
-                                )
-                            );
-                        }
+                        SyntaxKind operatorKind = GetOperatorKind(op);
+                        condition = BinaryExpression(
+                            operatorKind,
+                            IdentifierName(condVar),
+                            LiteralExpression(
+                                SyntaxKind.NumericLiteralExpression,
+                                Literal(condConstValue)
+                            )
+                        );
 
                         // Find true and false paths
                         var trueConnection = diagram.Edges.FirstOrDefault(c =>
@@ -442,6 +417,19 @@ namespace NodeBasedThreading.API.Services
                         yield return statement;
                     }
                 }
+            }
+
+            static SyntaxKind GetOperatorKind(string op)
+            {
+                return op switch
+                {
+                    "==" => SyntaxKind.EqualsExpression,
+                    "<" => SyntaxKind.LessThanExpression,
+                    ">" => SyntaxKind.GreaterThanExpression,
+                    "<=" => SyntaxKind.LessThanOrEqualExpression,
+                    ">=" => SyntaxKind.GreaterThanOrEqualExpression,
+                    _ => SyntaxKind.EqualsExpression,
+                };
             }
         }
 
