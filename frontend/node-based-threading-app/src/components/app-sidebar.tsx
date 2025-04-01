@@ -1,6 +1,7 @@
 import { useFlowStore } from "@/hooks/useFlowStore";
-import { downloadFlowAsJson } from "@/lib/saveFlowUtils";
 import { FileDown, FilePlus, FileText, Play, Save } from "lucide-react";
+import { useState } from "react";
+import { CodeBlockDialog } from "./CodeBlockDialog";
 import DndSidebar from "./DndSidebar";
 import {
   Sidebar,
@@ -59,6 +60,7 @@ const items = [
 export function AppSidebar() {
   // Get nodes and edges from our store
   const { nodes, edges } = useFlowStore();
+  const [showDialog, setShowDialog] = useState(false);
 
   // Handler for the save button
   const handleSave = () => {
@@ -67,12 +69,8 @@ export function AppSidebar() {
       return;
     }
 
-    try {
-      downloadFlowAsJson(nodes, edges);
-    } catch (error) {
-      console.error("Error saving flow:", error);
-      alert("Error saving diagram. Please try again.");
-    }
+    // Show the dialog instead of downloading directly
+    setShowDialog(true);
   };
 
   return (
@@ -116,6 +114,18 @@ export function AppSidebar() {
           <DndSidebar />
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Add the dialog component */}
+      {showDialog && (
+        <CodeBlockDialog
+          nodes={nodes}
+          edges={edges}
+          // dialogTitle="Зберегти Flow-діаграму"
+          // dialogDescription="JSON-представлення вашої Flow-діаграми"
+          open={showDialog}
+          onOpenChange={setShowDialog}
+        />
+      )}
     </Sidebar>
   );
 }
