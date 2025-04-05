@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 import { useReactFlow } from "@xyflow/react";
 import {
   NodeHeader,
-  NodeHeaderTitle,
   NodeHeaderActions,
   NodeHeaderMenuAction,
+  NodeHeaderTitle,
 } from "./node-header";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
 
@@ -33,11 +33,45 @@ export const BaseNode = forwardRef<
     },
     ref,
   ) => {
-    const { deleteElements } = useReactFlow();
+    const { deleteElements, getNode, setNodes } = useReactFlow();
 
     const handleDelete = useCallback(() => {
       deleteElements({ nodes: [{ id }] });
     }, [deleteElements, id]);
+
+    const handleDetach = useCallback(() => {
+      const node = getNode(id);
+      if (!node?.parentId) return;
+
+      setNodes((nodes) => {
+        return nodes.map((childNode) => {
+          if (childNode.id === id) {
+            // Find parent node to get its position
+            const parentNode = nodes.find(pn => pn.id === node.parentId);
+            if (!parentNode) return childNode;
+
+            // Create a copy without parentId and extent
+            const { parentId: _parentId, extent: _extent, ...rest } = childNode;
+            const width = childNode.measured?.width|| 0;
+            const height = childNode.measured?.height || 0;
+            
+            // Set position to parent's position minus child width
+            return {
+              ...rest,
+              position: {
+                x: parentNode.position.x - width,
+                y: parentNode.position.y - height,
+              },
+            };
+          }
+          return childNode;
+        });
+      });
+    }, [id, getNode, setNodes]);
+
+    const node = getNode(id);
+    const hasParent = node?.parentId != null;
+
     return (
       <div
         ref={ref}
@@ -58,9 +92,10 @@ export const BaseNode = forwardRef<
               {onReset && (
                 <DropdownMenuItem onSelect={onReset}>Reset</DropdownMenuItem>
               )}
-              <DropdownMenuItem onSelect={handleDelete}>
-                Delete
-              </DropdownMenuItem>
+              {hasParent && (
+                <DropdownMenuItem onSelect={handleDetach}>Detach</DropdownMenuItem>
+              )}
+              <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
             </NodeHeaderMenuAction>
           </NodeHeaderActions>
         </NodeHeader>

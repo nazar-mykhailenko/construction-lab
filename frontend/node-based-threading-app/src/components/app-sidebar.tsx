@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { ClearFlowDialog } from "./ClearFlowDialog";
 import { CodeBlockDialog } from "./CodeBlockDialog";
 import DndSidebar from "./DndSidebar";
+import { GeneratedCodeDialog } from "./GeneratedCodeDialog";
 import {
   Sidebar,
   SidebarContent,
@@ -17,19 +18,16 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 
-// Simple mock functions for demonstration
+// Simple mock function for demonstration
 const handleTest = () => {
   alert("Функція тестування запущена");
-};
-
-const handleConvertToCode = () => {
-  alert("Функція переведення в код запущена");
 };
 
 export function AppSidebar() {
   const { nodes, edges, setNodes, setEdges } = useFlowStore();
   const [showDialog, setShowDialog] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setViewport, fitView } = useReactFlow();
 
@@ -53,6 +51,14 @@ export function AppSidebar() {
     fileInputRef.current?.click();
   };
 
+  const handleConvertToCode = () => {
+    if (nodes.length === 0) {
+      alert("Немає вузлів для генерації коду!");
+      return;
+    }
+    setShowGenerateDialog(true);
+  };
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -68,6 +74,7 @@ export function AppSidebar() {
       // Close any open dialogs
       setShowDialog(false);
       setShowClearDialog(false);
+      setShowGenerateDialog(false);
     } catch (error) {
       alert('Failed to load diagram. Make sure the file is a valid flow diagram.');
     }
@@ -153,6 +160,13 @@ export function AppSidebar() {
       <ClearFlowDialog
         open={showClearDialog}
         onOpenChange={setShowClearDialog}
+      />
+
+      <GeneratedCodeDialog
+        nodes={nodes}
+        edges={edges}
+        open={showGenerateDialog}
+        onOpenChange={setShowGenerateDialog}
       />
     </Sidebar>
   );
