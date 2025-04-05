@@ -35,6 +35,9 @@ export const BaseNode = forwardRef<
   ) => {
     const { deleteElements, getNode, setNodes } = useReactFlow();
 
+    const node = getNode(id);
+    const hasParent = node?.parentId != null;
+
     const handleDelete = useCallback(() => {
       deleteElements({ nodes: [{ id }] });
     }, [deleteElements, id]);
@@ -47,14 +50,14 @@ export const BaseNode = forwardRef<
         return nodes.map((childNode) => {
           if (childNode.id === id) {
             // Find parent node to get its position
-            const parentNode = nodes.find(pn => pn.id === node.parentId);
+            const parentNode = nodes.find((pn) => pn.id === node.parentId);
             if (!parentNode) return childNode;
 
             // Create a copy without parentId and extent
             const { parentId: _parentId, extent: _extent, ...rest } = childNode;
-            const width = childNode.measured?.width|| 0;
+            const width = childNode.measured?.width || 0;
             const height = childNode.measured?.height || 0;
-            
+
             // Set position to parent's position minus child width
             return {
               ...rest,
@@ -68,9 +71,6 @@ export const BaseNode = forwardRef<
         });
       });
     }, [id, getNode, setNodes]);
-
-    const node = getNode(id);
-    const hasParent = node?.parentId != null;
 
     return (
       <div
@@ -93,9 +93,13 @@ export const BaseNode = forwardRef<
                 <DropdownMenuItem onSelect={onReset}>Reset</DropdownMenuItem>
               )}
               {hasParent && (
-                <DropdownMenuItem onSelect={handleDetach}>Detach</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleDetach}>
+                  Detach
+                </DropdownMenuItem>
               )}
-              <DropdownMenuItem onSelect={handleDelete}>Delete</DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleDelete}>
+                Delete
+              </DropdownMenuItem>
             </NodeHeaderMenuAction>
           </NodeHeaderActions>
         </NodeHeader>
