@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { downloadFlowAsJson } from "@/lib/saveFlowUtils";
 import { Edge, Node } from "@xyflow/react";
 import { useState } from "react";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface CodeBlockDialogProps {
   nodes: Node[];
@@ -18,7 +20,6 @@ interface CodeBlockDialogProps {
   buttonText?: string;
   dialogTitle?: string;
   dialogDescription?: string;
-  // Add new props for external control
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -29,13 +30,11 @@ export function CodeBlockDialog({
   buttonText = "Save",
   dialogTitle = "Your Flow JSON",
   dialogDescription = "Here is the JSON representation of your flow.",
-  // Use these new props with defaults for backward compatibility
   open,
   onOpenChange,
 }: CodeBlockDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Generate the JSON data for display
   const flowData = {
     nodes,
     edges,
@@ -47,13 +46,11 @@ export function CodeBlockDialog({
 
   const handleDownload = () => {
     downloadFlowAsJson(nodes, edges);
-    // Optionally close the dialog after download
     if (onOpenChange) {
       onOpenChange(false);
     }
   };
 
-  // If we're using the component with external control (open and onOpenChange props)
   if (onOpenChange !== undefined) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,8 +59,20 @@ export function CodeBlockDialog({
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>{dialogDescription}</DialogDescription>
           </DialogHeader>
-          <div className="bg-muted/50 my-4 max-h-[60vh] overflow-auto rounded-md p-4">
-            <pre className="text-sm">{jsonString}</pre>
+          <div className="bg-[#1E1E1E] my-4 max-h-[60vh] overflow-auto rounded-md">
+            <SyntaxHighlighter 
+              language="json"
+              style={vscDarkPlus}
+              customStyle={{
+                margin: 0,
+                borderRadius: '0.375rem',
+                background: '#1E1E1E',
+              }}
+              showLineNumbers
+              wrapLines
+            >
+              {jsonString}
+            </SyntaxHighlighter>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -78,8 +87,6 @@ export function CodeBlockDialog({
     );
   }
 
-  // Otherwise, we're using the component with its own internal trigger button
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -90,14 +97,23 @@ export function CodeBlockDialog({
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
-        <div className="bg-muted/50 my-4 max-h-[60vh] overflow-auto rounded-md p-4">
-          <pre className="text-sm">{jsonString}</pre>
+        <div className="bg-[#1E1E1E] my-4 max-h-[60vh] overflow-auto rounded-md">
+          <SyntaxHighlighter 
+            language="json"
+            style={vscDarkPlus}
+            customStyle={{
+              margin: 0,
+              borderRadius: '0.375rem',
+              background: '#1E1E1E',
+            }}
+            showLineNumbers
+            wrapLines
+          >
+            {jsonString}
+          </SyntaxHighlighter>
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setIsOpen(false)} // Close the dialog
-          >
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
             Close
           </Button>
           <Button onClick={handleDownload} className="ml-2">
