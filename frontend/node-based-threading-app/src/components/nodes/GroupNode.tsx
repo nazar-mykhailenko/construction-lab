@@ -5,13 +5,7 @@ type GroupNodeData = Node<{}, "groupNode">;
 
 function GroupNode({ selected, id }: NodeProps<GroupNodeData>) {
   return (
-    <div
-      className={cn(
-        "relative",
-        "min-h-[200px] min-w-[500px]",
-        "h-[200px] w-[500px]"
-      )}
-    >
+    <div className="relative min-h-[200px] min-w-[500px] w-full h-full">
       <NodeResizer
         color="gray"
         isVisible={selected}
