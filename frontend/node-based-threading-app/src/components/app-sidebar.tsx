@@ -1,5 +1,4 @@
 import { useFlowStore } from "@/hooks/useFlowStore";
-import { generateCode } from "@/lib/codeGenerationService";
 import { importFlow } from "@/lib/flowUtils";
 import { useReactFlow } from "@xyflow/react";
 import { FileDown, FilePlus, FileText, Play, Save } from "lucide-react";
@@ -7,7 +6,6 @@ import { useRef, useState } from "react";
 import { ClearFlowDialog } from "./ClearFlowDialog";
 import { CodeBlockDialog } from "./CodeBlockDialog";
 import DndSidebar from "./DndSidebar";
-import { GeneratedCodeDialog } from "./GeneratedCodeDialog";
 import {
   Sidebar,
   SidebarContent,
@@ -24,11 +22,14 @@ const handleTest = () => {
   alert("Функція тестування запущена");
 };
 
+const handleConvertToCode = () => {
+  alert("Функція переведення в код запущена");
+};
+
 export function AppSidebar() {
   const { nodes, edges, setNodes, setEdges } = useFlowStore();
   const [showDialog, setShowDialog] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
-  const [showGeneratedCodeDialog, setShowGeneratedCodeDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setViewport, fitView } = useReactFlow();
 
@@ -73,21 +74,6 @@ export function AppSidebar() {
 
     // Reset the file input
     event.target.value = '';
-  };
-
-  const handleConvertToCode = async () => {
-    if (nodes.length === 0) {
-      alert("No nodes to generate code from!");
-      return;
-    }
-    
-    try {
-      // When we implement the backend, generateCode will make the API call
-      await generateCode({ nodes, edges });
-      setShowGeneratedCodeDialog(true);
-    } catch (error) {
-      alert('Failed to generate code. Please try again.');
-    }
   };
 
   // Define items within the component to access state functions
@@ -167,13 +153,6 @@ export function AppSidebar() {
       <ClearFlowDialog
         open={showClearDialog}
         onOpenChange={setShowClearDialog}
-      />
-
-      <GeneratedCodeDialog
-        nodes={nodes}
-        edges={edges}
-        open={showGeneratedCodeDialog}
-        onOpenChange={setShowGeneratedCodeDialog}
       />
     </Sidebar>
   );

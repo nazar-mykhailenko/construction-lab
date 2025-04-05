@@ -110,7 +110,7 @@ export function Flow() {
         return;
       }
 
-      const position = screenToFlowPosition({
+            const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });

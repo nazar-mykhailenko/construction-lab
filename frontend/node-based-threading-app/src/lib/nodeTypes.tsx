@@ -1,6 +1,7 @@
 import AssignmentNode from "@/components/nodes/AssignmentNode";
 import ConditionNode from "@/components/nodes/ConditionNode";
 import ConstantAssignmentNode from "@/components/nodes/ConstantAssignmentNode";
+import GroupNode from "@/components/nodes/groupNode";
 import InputNode from "@/components/nodes/InputNode";
 import OutputNode from "@/components/nodes/OutputNode";
 import StartEndNode from "@/components/nodes/StartEndNode";
@@ -24,7 +25,8 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: InputNode,
     initialData: { variable: "" },
     sidebarConfig: {
-      className: "dndnode input mb-3 cursor-move rounded-md border border-blue-200 bg-blue-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode input mb-3 cursor-move rounded-md border border-blue-200 bg-blue-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -34,7 +36,8 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: OutputNode,
     initialData: { variable: "" },
     sidebarConfig: {
-      className: "dndnode output mb-3 cursor-move rounded-md border border-green-200 bg-green-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode output mb-3 cursor-move rounded-md border border-green-200 bg-green-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -44,7 +47,8 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: TextUpdaterNode,
     initialData: { label: "Text Node" },
     sidebarConfig: {
-      className: "dndnode mb-3 cursor-move rounded-md border border-gray-200 bg-gray-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode mb-3 cursor-move rounded-md border border-gray-200 bg-gray-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -54,7 +58,8 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: AssignmentNode,
     initialData: {},
     sidebarConfig: {
-      className: "dndnode mb-3 cursor-move rounded-md border border-purple-200 bg-purple-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode mb-3 cursor-move rounded-md border border-purple-200 bg-purple-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -64,7 +69,8 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: ConstantAssignmentNode,
     initialData: { variable: "", constant: "" },
     sidebarConfig: {
-      className: "dndnode mb-3 cursor-move rounded-md border border-yellow-200 bg-yellow-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode mb-3 cursor-move rounded-md border border-yellow-200 bg-yellow-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -74,7 +80,8 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: ConditionNode,
     initialData: {},
     sidebarConfig: {
-      className: "dndnode mb-3 cursor-move rounded-md border border-orange-200 bg-orange-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode mb-3 cursor-move rounded-md border border-orange-200 bg-orange-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -84,7 +91,19 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
     component: StartEndNode,
     initialData: {},
     sidebarConfig: {
-      className: "dndnode mb-3 cursor-move rounded-md border border-red-200 bg-red-100 p-3 shadow-sm transition-transform hover:scale-102",
+      className:
+        "dndnode mb-3 cursor-move rounded-md border border-red-200 bg-red-100 p-3 shadow-sm transition-transform hover:scale-102",
+      isDraggable: true,
+    },
+  },
+  groupNode: {
+    type: "groupNode",
+    label: "Group Node",
+    component: GroupNode,
+    initialData: {},
+    sidebarConfig: {
+      className:
+        "dndnode mb-3 cursor-move rounded-md border border-gray-200 bg-gray-100 p-3 shadow-sm transition-transform hover:scale-102",
       isDraggable: true,
     },
   },
@@ -93,17 +112,17 @@ export const nodeTypes: Record<string, NodeTypeConfig> = {
 // Helper function to get the node types map for ReactFlow
 export const getNodeTypesMap = () => {
   const typesMap: Record<string, React.ComponentType<any>> = {};
-  
+
   Object.values(nodeTypes).forEach((config) => {
     typesMap[config.type] = config.component;
   });
-  
+
   return typesMap;
 };
 
 // Helper to get draggable node types for sidebar
 export const getDraggableNodeTypes = () => {
   return Object.values(nodeTypes).filter(
-    (config) => config.sidebarConfig.isDraggable !== false
+    (config) => config.sidebarConfig.isDraggable !== false,
   );
 };
