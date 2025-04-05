@@ -10,18 +10,31 @@ type FlowState = {
   resetFlow: () => void;
 };
 
+// Create the store with persist middleware
 export const useFlowStore = create<FlowState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       nodes: [],
       edges: [],
-      setNodes: (nodes) => set({ nodes }),
-      setEdges: (edges) => set({ edges }),
-      resetFlow: () => set({ nodes: [], edges: [] })
+      setNodes: (nodes) => {
+        // Ensure we're not setting the same nodes
+        if (JSON.stringify(nodes) !== JSON.stringify(get().nodes)) {
+          set({ nodes: [...nodes] });
+        }
+      },
+      setEdges: (edges) => {
+        // Ensure we're not setting the same edges
+        if (JSON.stringify(edges) !== JSON.stringify(get().edges)) {
+          set({ edges: [...edges] });
+        }
+      },
+      resetFlow: () => set({ nodes: [], edges: [] }),
     }),
     {
-      name: 'flow-storage', // unique name for localStorage key
+      name: 'flow-storage',
       storage: createJSONStorage(() => localStorage),
+      // Only persist these fields
+      partialize: (state) => ({ nodes: state.nodes, edges: state.edges }),
     }
   )
 );

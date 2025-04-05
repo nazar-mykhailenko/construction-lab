@@ -1,6 +1,8 @@
 import { useFlowStore } from "@/hooks/useFlowStore";
+import { importFlow } from "@/lib/flowUtils";
+import { useReactFlow } from "@xyflow/react";
 import { FileDown, FilePlus, FileText, Play, Save } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ClearFlowDialog } from "./ClearFlowDialog";
 import { CodeBlockDialog } from "./CodeBlockDialog";
 import DndSidebar from "./DndSidebar";
@@ -16,10 +18,6 @@ import {
 } from "./ui/sidebar";
 
 // Simple mock functions for demonstration
-const handleImport = () => {
-  alert("Функція імпорту запущена");
-};
-
 const handleTest = () => {
   alert("Функція тестування запущена");
 };
@@ -28,36 +26,56 @@ const handleConvertToCode = () => {
   alert("Функція переведення в код запущена");
 };
 
-// We'll update the items in the component where we have access to state
-
 export function AppSidebar() {
-  // Get nodes and edges from our store
-  const { nodes, edges } = useFlowStore();
+  const { nodes, edges, setNodes, setEdges } = useFlowStore();
   const [showDialog, setShowDialog] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setViewport, fitView } = useReactFlow();
 
-  // Handler for the save button
   const handleSave = () => {
     if (nodes.length === 0) {
       alert("Немає вузлів для збереження!");
       return;
     }
-
-    // Show the dialog instead of downloading directly
     setShowDialog(true);
   };
 
-  // Handler for the create (clear) button
   const handleCreate = () => {
     if (nodes.length === 0 && edges.length === 0) {
       alert("Діаграма вже порожня!");
       return;
     }
-
-    // Show the confirmation dialog
     setShowClearDialog(true);
   };
-  
+
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await importFlow(file, {
+        setNodes,
+        setEdges,
+        setViewport,
+        fitView,
+      });
+      
+      // Close any open dialogs
+      setShowDialog(false);
+      setShowClearDialog(false);
+    } catch (error) {
+      alert('Failed to load diagram. Make sure the file is a valid flow diagram.');
+    }
+
+    // Reset the file input
+    event.target.value = '';
+  };
+
   // Define items within the component to access state functions
   const items = [
     {
@@ -89,12 +107,18 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="h-screen overflow-hidden">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".json"
+        style={{ display: "none" }}
+      />
       <SidebarContent className="flex h-full flex-col">
         <SidebarGroup className="flex-shrink-0">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Map all items including Create and Save */}
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -117,7 +141,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Save dialog */}
       {showDialog && (
         <CodeBlockDialog
           nodes={nodes}
@@ -127,10 +150,9 @@ export function AppSidebar() {
         />
       )}
 
-      {/* Clear diagram confirmation dialog - now using the separate component */}
-      <ClearFlowDialog 
-        open={showClearDialog} 
-        onOpenChange={setShowClearDialog} 
+      <ClearFlowDialog
+        open={showClearDialog}
+        onOpenChange={setShowClearDialog}
       />
     </Sidebar>
   );

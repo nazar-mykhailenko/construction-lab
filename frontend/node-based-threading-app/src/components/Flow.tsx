@@ -4,7 +4,6 @@ import { getNodeTypesMap, nodeTypes } from "@/lib/nodeTypes";
 import {
   Background,
   Controls,
-  Edge,
   OnConnect,
   OnEdgesChange,
   OnNodesChange,
@@ -13,12 +12,12 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
   useReactFlow,
-  type Node,
+  type Node
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
-const defaulEdgeOptions = {
+const defaultEdgeOptions = {
   animated: true,
   type: "step",
 };
@@ -39,10 +38,8 @@ function FlowWrapper({ children, className }: FlowWrapperProps) {
 const getId = () => `node_${crypto.randomUUID()}`;
 
 export function Flow() {
-  // Use the centralized node types map
   const nodeTypesMap = useMemo(() => getNodeTypesMap(), []);
 
-  // Get stored nodes and edges from Zustand
   const {
     nodes: storedNodes,
     edges: storedEdges,
@@ -50,27 +47,30 @@ export function Flow() {
     setEdges: storeSetEdges,
   } = useFlowStore();
 
-  // Initialize local state from the store
-  const [nodes, setNodes] = useState<Node[]>(storedNodes);
-  const [edges, setEdges] = useState<Edge[]>(storedEdges);
+  // Use stored values directly instead of local state
+  const [nodes, setNodes] = useState(storedNodes);
+  const [edges, setEdges] = useState(storedEdges);
 
   const { screenToFlowPosition } = useReactFlow();
   const [type] = useDnD();
 
-  // Sync with global store when local state changes
+  // Update local state when store changes
   useEffect(() => {
-    // Only update the store if the local state is different
-    if (JSON.stringify(nodes) !== JSON.stringify(storedNodes)) {
-      storeSetNodes(nodes);
-    }
-  }, [nodes, storeSetNodes, storedNodes]);
+    setNodes(storedNodes);
+  }, [storedNodes]);
 
   useEffect(() => {
-    // Only update the store if the local state is different
-    if (JSON.stringify(edges) !== JSON.stringify(storedEdges)) {
-      storeSetEdges(edges);
-    }
-  }, [edges, storeSetEdges, storedEdges]);
+    setEdges(storedEdges);
+  }, [storedEdges]);
+
+  // Update store when local state changes
+  useEffect(() => {
+    storeSetNodes(nodes);
+  }, [nodes, storeSetNodes]);
+
+  useEffect(() => {
+    storeSetEdges(edges);
+  }, [edges, storeSetEdges]);
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
@@ -141,7 +141,7 @@ export function Flow() {
         onConnect={onConnect}
         panOnScroll
         selectionOnDrag
-        defaultEdgeOptions={defaulEdgeOptions}
+        defaultEdgeOptions={defaultEdgeOptions}
         className="h-full w-full"
         fitView
         onDrop={onDrop}
