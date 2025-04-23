@@ -12,5 +12,8 @@ namespace NodeBasedThreading.API.Models
 
         [JsonPropertyName("data")]
         public Dictionary<string, string> Data { get; set; } = new();
+
+        [JsonPropertyName("parentId")]
+        public string? ParentId { get; set; }
     }
 }
