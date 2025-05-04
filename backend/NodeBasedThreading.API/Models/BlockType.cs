@@ -3,8 +3,6 @@ namespace NodeBasedThreading.API.Models
     // Supporting types
     public enum BlockType
     {
-        Start,
-        End,
         Assignment, // V1 = V2
         ConstantAssignment, // V = C
         Read, // INPUT V

@@ -450,10 +450,6 @@ namespace NodeBasedThreading.API.Services
                     case BlockType.Condition:
                         ExecuteCondition(block);
                         return; // Don't advance automatically for conditions
-                        
-                    case BlockType.End:
-                        IsCompleted = true;
-                        return;
                 }
                 
                 // Find and move to the next block

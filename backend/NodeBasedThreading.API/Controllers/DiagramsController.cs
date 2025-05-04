@@ -19,10 +19,10 @@ namespace NodeBasedThreading.API.Controllers
         }
 
         [HttpPost("generate")]
-        public string Test(List<ThreadDiagram> undividedDiagram)
+        public string GenerateThreadDiagramsCode(List<ThreadDiagram> undividedDiagram)
         {
             List<ThreadDiagram> diagrams = undividedDiagram[0]
-                .Nodes.Where(n => n.ParentId != null)
+                .Nodes.Where(n => n.ParentId != null && n.Type != BlockType.Operation)
                 .GroupBy(n => n.ParentId)
                 .Select(g => new ThreadDiagram
                 {
@@ -43,7 +43,7 @@ namespace NodeBasedThreading.API.Controllers
             {
                 // Extract and prepare the diagrams just like in the generate endpoint
                 List<ThreadDiagram> diagrams = request.Diagram[0]
-                    .Nodes.Where(n => n.ParentId != null)
+                    .Nodes.Where(n => n.ParentId != null && n.Type != BlockType.Operation)
                     .GroupBy(n => n.ParentId)
                     .Select(g => new ThreadDiagram
                     {

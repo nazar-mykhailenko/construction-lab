@@ -391,14 +391,10 @@ namespace NodeBasedThreading.API.Services
                         yield break;
                     }
                     break;
-
-                case BlockType.End:
-                    // For end blocks, just return
-                    yield break;
             }
 
             // Find and generate the next block (for non-condition blocks)
-            if (block.Type != BlockType.Condition && block.Type != BlockType.End)
+            if (block.Type != BlockType.Condition)
             {
                 var nextConnection = diagram.Edges.FirstOrDefault(c =>
                     c.SourceId == block.Id && c.Type == ConnectionType.Normal
