@@ -1,3 +1,5 @@
+using NodeBasedThreading.API.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -18,6 +20,10 @@ builder.Services.AddRouting(opt =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register application services
+builder.Services.AddScoped<DiagramTestingService>();
+builder.Services.AddSingleton<TestOperationManager>();
 
 var app = builder.Build();
 
