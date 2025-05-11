@@ -1,5 +1,6 @@
 import { Handle, Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
 import { useCallback } from "react";
+import { BaseNode } from "../base-node";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import {
@@ -9,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { BaseNode } from "../base-node";
 
 // Define the custom node type
 type ConditionNode = Node<
@@ -73,6 +73,7 @@ function ConditionNode({ id, data, selected }: NodeProps<ConditionNode>) {
           <label className="mb-1 text-xs">Variable</label>
           <Input
             placeholder="variable name"
+            value={data.variable || ""}
             onChange={onVariableChange}
             className={"nodrag rounded border bg-white px-2 py-1 text-sm"}
           />
@@ -105,6 +106,7 @@ function ConditionNode({ id, data, selected }: NodeProps<ConditionNode>) {
           <label className="mb-1 text-xs">Value</label>
           <Input
             placeholder="constant value"
+            value={data.constant || ""}
             onChange={onConstantChange}
             className={"nodrag rounded border bg-white px-2 py-1 text-sm"}
           />
