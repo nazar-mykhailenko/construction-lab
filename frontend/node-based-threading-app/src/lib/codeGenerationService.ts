@@ -41,12 +41,13 @@ function convertFlowDataToJSON(flowData: FlowData) {
         id: node.id,
         type: node.type,
         data: node.data,
+        parentId: node.parentId,
       })),
       edges: flowData.edges.map((edge) => ({
         id: edge.id,
         source: edge.source,
         target: edge.target,
-        sourceHandle: parseInt(edge.sourceHandle || "false"),
+        sourceHandle: edge.sourceHandle,
       })),
     },
   ]);
