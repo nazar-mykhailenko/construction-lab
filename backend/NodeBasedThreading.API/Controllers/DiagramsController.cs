@@ -22,7 +22,7 @@ namespace NodeBasedThreading.API.Controllers
         public string GenerateThreadDiagramsCode(List<ThreadDiagram> undividedDiagram)
         {
             List<ThreadDiagram> diagrams = undividedDiagram[0]
-                .Nodes.Where(n => n.ParentId != null && n.Type != BlockType.Operation)
+                .Nodes.Where(n => n.ParentId != null)
                 .GroupBy(n => n.ParentId)
                 .Select(g => new ThreadDiagram
                 {
@@ -54,7 +54,7 @@ namespace NodeBasedThreading.API.Controllers
 
                 // Create a new test operation with cancellation token
                 var (operationId, token) = _testOperationManager.CreateTestOperation();
-                
+
                 // Start the test in background
                 _ = Task.Run(async () =>
                 {
@@ -62,10 +62,10 @@ namespace NodeBasedThreading.API.Controllers
                     {
                         // Run the test simulation
                         var result = await _testingService.TestDiagrams(
-                            diagrams, 
+                            diagrams,
                             request.TestCase,
                             token);
-                            
+
                         // Store the result for later retrieval
                         _testOperationManager.StoreTestResult(operationId, result);
                     }
@@ -78,10 +78,10 @@ namespace NodeBasedThreading.API.Controllers
                     {
                         // Log the error
                         Console.WriteLine($"Error in test operation {operationId}: {ex.Message}");
-                        
+
                         // Store an error result
-                        _testOperationManager.StoreTestResult(operationId, new DiagramTestResult 
-                        { 
+                        _testOperationManager.StoreTestResult(operationId, new DiagramTestResult
+                        {
                             Cancelled = true,
                             // We could add an Error property to DiagramTestResult in a real implementation
                         });
@@ -94,8 +94,8 @@ namespace NodeBasedThreading.API.Controllers
                 });
 
                 // Return the operation ID to the client
-                return Ok(new TestOperationResponse 
-                { 
+                return Ok(new TestOperationResponse
+                {
                     OperationId = operationId,
                     Status = "started"
                 });
@@ -111,19 +111,19 @@ namespace NodeBasedThreading.API.Controllers
         {
             // Get the current status
             string status = _testOperationManager.GetOperationStatus(operationId);
-            
+
             // If the operation is not found
             if (status == "not_found")
             {
                 return NotFound(new { Status = "not_found", Message = "Test operation not found" });
             }
-            
+
             // Create the response
             var response = new TestStatusResponse
             {
                 Status = status
             };
-            
+
             // If the test is complete, include results
             if (status == "completed" || status == "cancelled")
             {
@@ -131,7 +131,7 @@ namespace NodeBasedThreading.API.Controllers
                 if (result != null)
                 {
                     response.Result = result;
-                    
+
                     // If a specific limit K is requested, filter for that K only
                     if (limitK.HasValue && limitK.Value >= 1 && limitK.Value <= 20)
                     {
@@ -142,7 +142,7 @@ namespace NodeBasedThreading.API.Controllers
                     }
                 }
             }
-            
+
             return Ok(response);
         }
 
@@ -150,12 +150,12 @@ namespace NodeBasedThreading.API.Controllers
         public ActionResult CancelTest(string operationId)
         {
             bool cancelled = _testOperationManager.CancelOperation(operationId);
-            
+
             if (cancelled)
             {
                 return Ok(new { Status = "cancellation_requested", Message = "Test cancellation requested" });
             }
-            
+
             return NotFound(new { Status = "not_found", Message = "Test operation not found or already completed" });
         }
     }
@@ -185,13 +185,13 @@ namespace NodeBasedThreading.API.Controllers
         /// Unique ID for the test operation
         /// </summary>
         public string OperationId { get; set; }
-        
+
         /// <summary>
         /// Status of the test operation
         /// </summary>
         public string Status { get; set; }
     }
-    
+
     /// <summary>
     /// Response model for test status
     /// </summary>
@@ -201,12 +201,12 @@ namespace NodeBasedThreading.API.Controllers
         /// Status of the test operation: "running", "cancelling", "completed", "cancelled"
         /// </summary>
         public string Status { get; set; }
-        
+
         /// <summary>
         /// Test result, only populated if status is "completed" or "cancelled"
         /// </summary>
         public DiagramTestResult Result { get; set; }
-        
+
         /// <summary>
         /// Success percentage for the specifically requested K limit, if any
         /// </summary>

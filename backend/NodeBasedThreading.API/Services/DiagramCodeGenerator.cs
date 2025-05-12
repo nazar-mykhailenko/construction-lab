@@ -463,19 +463,19 @@ namespace NodeBasedThreading.API.Services
                 )
             );
 
-            // Create tasks for each thread
+            // Create list of threads
             statements.Add(
                 LocalDeclarationStatement(
                     VariableDeclaration(
                             GenericName(Identifier("List"))
                                 .WithTypeArgumentList(
                                     TypeArgumentList(
-                                        SingletonSeparatedList<TypeSyntax>(IdentifierName("Task"))
+                                        SingletonSeparatedList<TypeSyntax>(IdentifierName("Thread"))
                                     )
                                 )
                         )
                         .AddVariables(
-                            VariableDeclarator(Identifier("tasks"))
+                            VariableDeclarator(Identifier("threads"))
                                 .WithInitializer(
                                     EqualsValueClause(
                                         ObjectCreationExpression(
@@ -483,7 +483,7 @@ namespace NodeBasedThreading.API.Services
                                                     .WithTypeArgumentList(
                                                         TypeArgumentList(
                                                             SingletonSeparatedList<TypeSyntax>(
-                                                                IdentifierName("Task")
+                                                                IdentifierName("Thread")
                                                             )
                                                         )
                                                     )
@@ -495,55 +495,83 @@ namespace NodeBasedThreading.API.Services
                 )
             );
 
-            // Start each thread
+            // Create and start each thread
             for (int i = 0; i < diagrams.Count; i++)
             {
+                int threadIndex = i + 1; // Capture the value to use in lambda expression
                 statements.Add(
-                    ExpressionStatement(
-                        InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("tasks"),
-                                    IdentifierName("Add")
-                                )
-                            )
-                            .AddArgumentListArguments(
-                                Argument(
-                                    InvocationExpression(
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName("Task"),
-                                                IdentifierName("Run")
-                                            )
-                                        )
-                                        .AddArgumentListArguments(
-                                            Argument(
-                                                SimpleLambdaExpression(
-                                                    Parameter(Identifier("_")),
-                                                    InvocationExpression(
-                                                        IdentifierName($"Thread{i + 1}Method")
-                                                    )
+                    LocalDeclarationStatement(
+                        VariableDeclaration(
+                            IdentifierName("Thread")
+                        ).AddVariables(
+                            VariableDeclarator(Identifier($"thread{threadIndex}"))
+                                .WithInitializer(
+                                    EqualsValueClause(
+                                        ObjectCreationExpression(
+                                            IdentifierName("Thread")
+                                        ).WithArgumentList(
+                                            ArgumentList().AddArguments(
+                                                Argument(
+                                                    ParenthesizedLambdaExpression()
+                                                        .WithExpressionBody(
+                                                            InvocationExpression(
+                                                                IdentifierName($"Thread{threadIndex}Method")
+                                                            )
+                                                        )
                                                 )
                                             )
                                         )
+                                    )
                                 )
+                        )
+                    )
+                );
+
+                // Add thread to list
+                statements.Add(
+                    ExpressionStatement(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                IdentifierName("threads"),
+                                IdentifierName("Add")
                             )
+                        ).AddArgumentListArguments(
+                            Argument(IdentifierName($"thread{threadIndex}"))
+                        )
+                    )
+                );
+
+                // Start the thread
+                statements.Add(
+                    ExpressionStatement(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                IdentifierName($"thread{threadIndex}"),
+                                IdentifierName("Start")
+                            )
+                        )
                     )
                 );
             }
 
-            // Wait for all threads to complete
+            // Wait for all threads to complete using Join
             statements.Add(
-                ExpressionStatement(
-                    AwaitExpression(
-                        InvocationExpression(
+                ForEachStatement(
+                    IdentifierName("Thread"),
+                    Identifier("thread"),
+                    IdentifierName("threads"),
+                    Block(
+                        ExpressionStatement(
+                            InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("Task"),
-                                    IdentifierName("WhenAll")
+                                    IdentifierName("thread"),
+                                    IdentifierName("Join")
                                 )
                             )
-                            .AddArgumentListArguments(Argument(IdentifierName("tasks")))
+                        )
                     )
                 )
             );
@@ -582,11 +610,13 @@ namespace NodeBasedThreading.API.Services
                 )
             );
 
-            return MethodDeclaration(IdentifierName("Task"), Identifier("Main"))
+            return MethodDeclaration(
+                    PredefinedType(Token(SyntaxKind.VoidKeyword)),
+                    Identifier("Main")
+                )
                 .AddModifiers(
                     Token(SyntaxKind.PublicKeyword),
-                    Token(SyntaxKind.StaticKeyword),
-                    Token(SyntaxKind.AsyncKeyword)
+                    Token(SyntaxKind.StaticKeyword)
                 )
                 .AddParameterListParameters(
                     Parameter(Identifier("args"))
