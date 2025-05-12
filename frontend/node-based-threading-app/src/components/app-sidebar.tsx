@@ -7,6 +7,7 @@ import { ClearFlowDialog } from "./ClearFlowDialog";
 import { CodeBlockDialog } from "./CodeBlockDialog";
 import DndSidebar from "./DndSidebar";
 import { GeneratedCodeDialog } from "./GeneratedCodeDialog";
+import { TestDialog } from "./TestDialog";
 import {
   Sidebar,
   SidebarContent,
@@ -18,18 +19,22 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 
-// Simple mock function for demonstration
-const handleTest = () => {
-  alert("Функція тестування запущена");
-};
-
 export function AppSidebar() {
   const { nodes, edges, setNodes, setEdges } = useFlowStore();
   const [showDialog, setShowDialog] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [showTestDialog, setShowTestDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setViewport, fitView } = useReactFlow();
+
+  const handleTest = () => {
+    if (nodes.length === 0) {
+      alert("No nodes to test!");
+      return;
+    }
+    setShowTestDialog(true);
+  };
 
   const handleSave = () => {
     if (nodes.length === 0) {
@@ -59,7 +64,9 @@ export function AppSidebar() {
     setShowGenerateDialog(true);
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -70,17 +77,21 @@ export function AppSidebar() {
         setViewport,
         fitView,
       });
-      
+
       // Close any open dialogs
       setShowDialog(false);
       setShowClearDialog(false);
       setShowGenerateDialog(false);
-    } catch (error) {
-      alert('Failed to load diagram. Make sure the file is a valid flow diagram.');
+      setShowTestDialog(false);
+    } catch (err) {
+      console.error("Failed to load diagram:", err);
+      alert(
+        "Failed to load diagram. Make sure the file is a valid flow diagram.",
+      );
     }
 
     // Reset the file input
-    event.target.value = '';
+    event.target.value = "";
   };
 
   // Define items within the component to access state functions
@@ -168,6 +179,8 @@ export function AppSidebar() {
         open={showGenerateDialog}
         onOpenChange={setShowGenerateDialog}
       />
+
+      <TestDialog open={showTestDialog} onOpenChange={setShowTestDialog} />
     </Sidebar>
   );
 }
